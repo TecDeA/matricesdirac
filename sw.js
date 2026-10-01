@@ -1,4 +1,4 @@
-const CACHE_NAME = 'matrices-dirac-v3';
+const CACHE_NAME = 'matrices-dirac-v5';
 const ASSETS = [
     './',
     './index.html',
@@ -28,6 +28,10 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    // Solo GET y solo peticiones dentro del propio scope (/MatricesDirac/):
+    // no interfiere con angelmicelti.github.io ni con otros repos de GitHub Pages.
+    if (event.request.method !== 'GET') return;
+    if (!event.request.url.startsWith(self.registration.scope)) return;
     event.respondWith(
         caches.match(event.request).then((cached) => cached || fetch(event.request))
     );

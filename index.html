@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Obtención de las Matrices de Dirac</title>
+
+    <!-- PWA / Favicon -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0c4a6e">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
+    
+    <!-- MathJax Configuration and Library -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                tags: 'ams'
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Custom Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Merriweather', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Solo se muestra la sección activa (navegación por páginas) */
+        section.page { display: none; }
+        section.page.active { display: block; }
+
+        /* Custom Styles for elegance and math overflow */
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .math-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 1rem 0;
+            margin: 1.5rem 0;
+            background-color: #f8fafc;
+            border-radius: 0.5rem;
+            border-left: 4px solid #0ea5e9;
+            box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.02);
+            text-align: center;
+        }
+        /* Custom Scrollbar for math blocks */
+        .math-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        .math-container::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        .math-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .math-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        
+        /* Highlight active TOC link */
+        .toc-active {
+            color: #0ea5e9;
+            font-weight: 600;
+            border-left-color: #0ea5e9;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+    <!-- Hero Header -->
+    <header class="relative bg-brand-900 text-white py-20 px-6 sm:px-12 lg:px-24 overflow-hidden">
+        <div class="absolute inset-0 opacity-20">
+            <svg class="h-full w-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path d="M0 100 C 20 0 50 0 100 100 Z" fill="rgba(255,255,255,0.1)"></path>
+                <path d="M0 50 C 30 100 80 100 100 50 Z" fill="rgba(255,255,255,0.05)"></path>
+            </svg>
+        </div>
+        <div class="relative max-w-5xl mx-auto">
+            <span class="text-brand-500 font-semibold tracking-wider uppercase text-sm mb-4 block">Física Teórica & Álgebra Lineal</span>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-serif font-bold leading-tight mb-6 text-white shadow-sm">
+                La Obtención de las <br /> Matrices de Dirac
+            </h1>
+            <p class="text-lg md:text-xl text-brand-100 max-w-2xl font-light leading-relaxed">
+                Un rompecabezas matemático de la década de 1920 que unió la Mecánica Cuántica con la Relatividad Especial, prediciendo la existencia de la antimateria.
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content Layout -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col lg:flex-row gap-12 relative">
+        
+        <!-- Sidebar / Table of Contents -->
+        <aside class="w-full lg:w-1/4 hidden lg:block sticky top-8 self-start">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">Índice del Contenido</h3>
+                <nav id="toc" class="space-y-1 text-sm border-l-2 border-gray-100">
+                    <a href="#intro" class="block py-2 pl-4 text-gray-600 hover:text-brand-700 hover:bg-gray-50 border-l-2 border-transparent transition-colors">1. Introducción y Contexto Físico</a>
+                    <a href="#problema" class="block py-2 pl-4 text-gray-600 hover:text-brand-700 hover:bg-gray-50 border-l-2 border-transparent transition-colors">2. El Problema Matemático</a>
+                    <a href="#condiciones" class="block py-2 pl-4 text-gray-600 hover:text-brand-700 hover:bg-gray-50 border-l-2 border-transparent transition-colors">3. Restricciones Físicas y Algebraicas</a>
+                    <a href="#solucion" class="block py-2 pl-4 text-gray-600 hover:text-brand-700 hover:bg-gray-50 border-l-2 border-transparent transition-colors">4. Matrices que Anticonmutan</a>
+                    <a href="#construccion" class="block py-2 pl-4 text-gray-600 hover:text-brand-700 hover:bg-gray-50 border-l-2 border-transparent transition-colors">5. Construcción (Dirac-Pauli)</a>
+                    <a href="#gamma" class="block py-2 pl-4 text-gray-600 hover:text-brand-700 hover:bg-gray-50 border-l-2 border-transparent transition-colors">6. La Elegancia Relativista (Matrices $\gamma$)</a>
+                    <a href="#consecuencia" class="block py-2 pl-4 text-gray-600 hover:text-brand-700 hover:bg-gray-50 border-l-2 border-transparent transition-colors">7. Consecuencia Física Final</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Article Content -->
+        <main class="w-full lg:w-3/4 bg-white p-6 sm:p-10 rounded-2xl shadow-sm border border-gray-100">
+            <article class="prose prose-lg max-w-none font-serif text-gray-700 leading-loose space-y-8">
+                
+                <section id="intro" class="page active scroll-mt-12">
+                    <h2 class="text-3xl font-bold text-gray-900 font-sans mb-6">1. Introducción y Contexto Físico</h2>
+                    <p>
+                        En la década de 1920, la física se enfrentaba a un problema fundamental: la ecuación de Schrödinger, que describía muy bien el comportamiento de las partículas cuánticas (como los electrones), era incompatible con la Teoría de la Relatividad Especial de Einstein.
+                    </p>
+                    <p>
+                        En mecánica cuántica, la energía ($E$) y el momento lineal ($p$) se representan mediante operadores de derivadas. La ecuación de Schrödinger es de "primer orden" respecto al tiempo (una derivada temporal) y de "segundo orden" respecto al espacio. Sin embargo, la relatividad exige que el espacio y el tiempo se traten en igualdad de condiciones (como un espacio-tiempo unificado de 4 dimensiones).
+                    </p>
+                    <p>
+                        La relación de energía relativista para una partícula libre de masa $m$ es:
+                    </p>
+                    <div class="math-container">
+                        $$ E^2 = p^2 c^2 + m^2 c^4 $$
+                    </div>
+                    <p>
+                        Para simplificar la notación matemática, utilizaremos "unidades naturales", donde la velocidad de la luz $c = 1$. Así, la ecuación queda como:
+                    </p>
+                    <div class="math-container">
+                        $$ E^2 = p_x^2 + p_y^2 + p_z^2 + m^2 $$
+                    </div>
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg my-6 font-sans text-base">
+                        <h4 class="font-bold text-blue-900 mb-2">El problema físico previo: La ecuación de Klein-Gordon</h4>
+                        <p class="text-blue-800">
+                            Si se intenta convertir $E^2 = p^2 + m^2$ directamente en una ecuación cuántica, se obtiene la <em>Ecuación de Klein-Gordon</em> (con segundas derivadas espaciales y temporales). Esta ecuación fue descartada inicialmente porque permitía <strong>probabilidades negativas</strong>. En mecánica cuántica estándar, la densidad de probabilidad debe ser estrictamente positiva ($\rho \ge 0$). Una derivada segunda en el tiempo arruinaba esta propiedad vital.
+                        </p>
+                    </div>
+                    <p>
+                        Paul Dirac se propuso encontrar una ecuación que fuera de <strong>primer orden</strong> tanto en el espacio como en el tiempo (para garantizar probabilidades positivas), pero que al elevarse al cuadrado respetara estrictamente la fórmula relativista.
+                    </p>
+                </section>
+
+                <section id="problema" class="page scroll-mt-12">
+                    <h2 class="text-3xl font-bold text-gray-900 font-sans mb-6">2. El Problema Matemático: Factorizar una suma de cuadrados</h2>
+                    <p>
+                        El brillante truco de Dirac fue proponer que la energía $E$ podía escribirse como un polinomio de primer grado; una combinación lineal de las componentes del momento ($p_x, p_y, p_z$) y la masa ($m$), multiplicadas por unos coeficientes desconocidos. Llamemos a estos coeficientes $\alpha_1, \alpha_2, \alpha_3$ y $\beta$.
+                    </p>
+                    <p>
+                        Dirac planteó la siguiente ecuación lineal:
+                    </p>
+                    <div class="math-container text-xl">
+                        $$ E = \alpha_1 p_x + \alpha_2 p_y + \alpha_3 p_z + \beta m $$
+                    </div>
+                    <p>
+                        El requisito físico indispensable es que, si elevamos esta expresión al cuadrado, debemos recuperar exactamente la ecuación relativista original: $E^2 = p_x^2 + p_y^2 + p_z^2 + m^2$. Vamos a elevar al cuadrado la ecuación propuesta por Dirac:
+                    </p>
+                    <div class="math-container">
+                        $$ E^2 = (\alpha_1 p_x + \alpha_2 p_y + \alpha_3 p_z + \beta m)^2 $$
+                    </div>
+                    <p>
+                        Al desarrollar este producto con cuidado, no asumiendo que los coeficientes conmutan (es decir, asumiendo $AB \neq BA$), y agrupando los términos, obtenemos:
+                    </p>
+                    <div class="math-container overflow-x-auto text-sm md:text-base">
+                        \begin{align*}
+                        E^2 =& \;\alpha_1^2 p_x^2 + \alpha_2^2 p_y^2 + \alpha_3^2 p_z^2 + \beta^2 m^2 \\
+                             &+ (\alpha_1 \alpha_2 + \alpha_2 \alpha_1)p_x p_y + (\alpha_1 \alpha_3 + \alpha_3 \alpha_1)p_x p_z + (\alpha_2 \alpha_3 + \alpha_3 \alpha_2)p_y p_z \\
+                             &+ (\alpha_1 \beta + \beta \alpha_1)p_x m + (\alpha_2 \beta + \beta \alpha_2)p_y m + (\alpha_3 \beta + \beta \alpha_3)p_z m
+                        \end{align*}
+                    </div>
+                </section>
+
+                <section id="condiciones" class="page scroll-mt-12">
+                    <h2 class="text-3xl font-bold text-gray-900 font-sans mb-6">3. Restricciones Físicas y Algebraicas</h2>
+                    <p>
+                        Para que este largo polinomio coincida exactamente con $p_x^2 + p_y^2 + p_z^2 + m^2$, debemos igualar coeficientes. Así surgen tres restricciones fundamentales, dos matemáticas y una física:
+                    </p>
+                    
+                    <h3 class="text-xl font-bold font-sans mt-8 mb-4">I. Condiciones para los términos al cuadrado</h3>
+                    <p>Los términos cuadráticos existen en la ecuación original con coeficiente $1$:</p>
+                    <div class="math-container">
+                        $$ \alpha_1^2 = 1, \quad \alpha_2^2 = 1, \quad \alpha_3^2 = 1, \quad \beta^2 = 1 $$
+                    </div>
+
+                    <h3 class="text-xl font-bold font-sans mt-8 mb-4">II. Condiciones para los términos cruzados</h3>
+                    <p>Los términos mixtos ($p_x p_y$, etc.) NO existen en la ecuación original, por lo que sus coeficientes deben anularse:</p>
+                    <div class="math-container">
+                        $$ \alpha_i \alpha_j + \alpha_j \alpha_i = 0 \quad (\text{para } i \neq j) $$
+                        $$ \alpha_i \beta + \beta \alpha_i = 0 $$
+                    </div>
+
+                    <h3 class="text-xl font-bold font-sans mt-8 mb-4">III. La restricción Cuántica (Hermiticidad)</h3>
+                    <p>
+                        En física cuántica, $E$ representa el operador Hamiltoniano (la energía total del sistema). Todo observable físico real debe estar representado por un operador matemático <strong>Hermítico</strong> (que es igual a su propia matriz transpuesta conjugada, denotado con $\dagger$). Esto garantiza que los valores medibles de la energía sean números reales, no complejos. Por tanto:
+                    </p>
+                    <div class="math-container">
+                        $$ \alpha_i^\dagger = \alpha_i \quad \text{y} \quad \beta^\dagger = \beta $$
+                    </div>
+
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg my-6 font-sans text-base">
+                        <p class="text-red-900 font-semibold">El colapso de los números reales:</p>
+                        <p class="text-red-800 mt-2">
+                            Si intentamos resolver esto asumiendo que $\alpha$ y $\beta$ son números, la propiedad conmutativa ($ab = ba$) hace que $\alpha_i \alpha_j + \alpha_j \alpha_i = 2\alpha_i \alpha_j$. Para que sea cero, uno debe ser cero, lo que impide que $\alpha_i^2 = 1$. <strong>Conclusión radical:</strong> Los coeficientes de Dirac no pueden ser números ordinarios.
+                        </p>
+                    </div>
+                </section>
+
+                <section id="solucion" class="page scroll-mt-12">
+                    <h2 class="text-3xl font-bold text-gray-900 font-sans mb-6">4. La Solución: Matrices que Anticonmutan</h2>
+                    <p>
+                        Dado que los objetos matemáticos que buscamos <em>anticonmutan</em> (es decir, $AB = -BA$), Dirac se dio cuenta de que debían ser <strong>matrices cuadradas</strong>. Utilizando la notación del anticonmutador $\{A, B\} = AB + BA$, las matrices deben cumplir el álgebra de Clifford:
+                    </p>
+                    <div class="math-container">
+                        $$ \{\alpha_i, \alpha_j\} = 2\delta_{ij}I \quad ; \quad \{\alpha_i, \beta\} = 0 \quad ; \quad \beta^2 = I $$
+                    </div>
+                    
+                    <h3 class="text-xl font-bold font-sans mt-8 mb-4">El tamaño importa</h3>
+                    <ul class="list-disc pl-6 space-y-4 font-sans text-base text-gray-700">
+                        <li><strong>1x1:</strong> Son números simples. Ya vimos que fallan.</li>
+                        <li><strong>2x2:</strong> Existen 3 matrices de 2x2 que anticonmutan: las famosas <strong>Matrices de Pauli</strong> ($\sigma_1, \sigma_2, \sigma_3$). Físicamente, estas matrices explican el fenómeno cuántico del <em>espín del electrón</em>. Sin embargo, necesitamos <strong>cuatro</strong> matrices en total (tres $\alpha$ espaciales y una $\beta$ para la masa). Matemáticamente, no existe una cuarta matriz de 2x2 independiente que anticonmute con ellas.</li>
+                        <li><strong>4x4:</strong> El tamaño mínimo funcional para encontrar 4 matrices con estas propiedades hermíticas y de anticonmutación es de 4 filas por 4 columnas.</li>
+                    </ul>
+                </section>
+
+                <section id="construccion" class="page scroll-mt-12">
+                    <h2 class="text-3xl font-bold text-gray-900 font-sans mb-6">5. Construcción de las Matrices (Dirac-Pauli)</h2>
+                    <p>
+                        Dirac construyó sus matrices de $4 \times 4$ como "matrices de bloques", usando las matrices de Pauli ($2 \times 2$) y la identidad ($I_2$). Las matrices de Pauli son:
+                    </p>
+                    <div class="math-container text-sm md:text-base">
+                        $$ \sigma_1 = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}, \quad \sigma_2 = \begin{pmatrix} 0 & -i \\ i & 0 \end{pmatrix}, \quad \sigma_3 = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix} $$
+                    </div>
+                    
+                    <p>La construcción estándar es la siguiente:</p>
+                    
+                    <p class="font-bold">Para la masa ($\beta$):</p>
+                    <div class="math-container">
+                        $$ \beta = \begin{pmatrix} I_2 & 0 \\ 0 & -I_2 \end{pmatrix} = \begin{pmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & -1 & 0 \\ 0 & 0 & 0 & -1 \end{pmatrix} $$
+                    </div>
+
+                    <p class="font-bold">Para los momentos ($\alpha_i$, donde $i = 1, 2, 3$):</p>
+                    <div class="math-container">
+                        $$ \alpha_i = \begin{pmatrix} 0 & \sigma_i \\ \sigma_i & 0 \end{pmatrix} $$
+                    </div>
+                    
+                    <p>Si expandimos $\alpha_1$, por ejemplo, resulta en:</p>
+                    <div class="math-container">
+                        $$ \alpha_1 = \begin{pmatrix} 0 & 0 & 0 & 1 \\ 0 & 0 & 1 & 0 \\ 0 & 1 & 0 & 0 \\ 1 & 0 & 0 & 0 \end{pmatrix} $$
+                    </div>
+                </section>
+
+                <section id="gamma" class="page scroll-mt-12">
+                    <h2 class="text-3xl font-bold text-gray-900 font-sans mb-6">6. La Elegancia Relativista (Las Matrices $\gamma$)</h2>
+                    <p>
+                        Aunque las matrices $\alpha$ y $\beta$ resuelven el problema matemático, distinguen artificialmente entre el espacio y el tiempo. En relatividad especial, el espacio y el tiempo forman una sola entidad (el espaciotiempo de Minkowski).
+                    </p>
+                    <p>
+                        Para hacer la ecuación manifiestamente covariante (que luzca igual desde cualquier sistema de referencia relativista), se introducen las famosas <strong>Matrices Gamma ($\gamma^\mu$)</strong>, donde el índice $\mu$ va de 0 a 3 (0 para el tiempo, 1,2,3 para el espacio). Se definen multiplicando por $\beta$:
+                    </p>
+                    <div class="math-container">
+                        $$ \gamma^0 = \beta \quad \text{y} \quad \gamma^i = \beta \alpha_i \quad (\text{para } i=1,2,3) $$
+                    </div>
+                    <p>
+                        Estas nuevas matrices cumplen un álgebra de Clifford que refleja directamente la métrica $\eta^{\mu\nu}$ de la Relatividad Especial de Einstein (donde $\eta^{00}=1$, $\eta^{11}=\eta^{22}=\eta^{33}=-1$):
+                    </p>
+                    <div class="math-container">
+                        $$ \{\gamma^\mu, \gamma^\nu\} = \gamma^\mu\gamma^\nu + \gamma^\nu\gamma^\mu = 2\eta^{\mu\nu}I $$
+                    </div>
+                    <p>
+                        Esta ecuación es considerada una de las más bellas de la física, pues vincula profundamente el álgebra matricial (cuántica) con la geometría del espaciotiempo (relatividad). La Ecuación de Dirac se puede escribir entonces de forma ultracompacta como:
+                    </p>
+                    <div class="math-container text-xl font-bold">
+                        $$ (i\gamma^\mu \partial_\mu - m)\psi = 0 $$
+                    </div>
+                </section>
+
+                <section id="consecuencia" class="page scroll-mt-12 mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900 font-sans mb-6">7. Consecuencia Física Final</h2>
+                    <p>
+                        Para que las matrices de $4 \times 4$ pudieran operar matemáticamente, la "función de onda" ($\psi$) del electrón ya no podía ser un simple número o escalar. Debía ser un vector columna de 4 componentes, conocido hoy como <strong>Espinor de Dirac</strong>:
+                    </p>
+                    <div class="math-container">
+                        $$ \psi = \begin{pmatrix} \psi_1 \\ \psi_2 \\ \psi_3 \\ \psi_4 \end{pmatrix} $$
+                    </div>
+                    <p>
+                        Este requerimiento puramente algebraico tuvo una implicación física monumental:
+                    </p>
+                    <ul class="list-disc pl-6 space-y-4 font-sans text-base text-gray-700">
+                        <li><strong>Componentes 1 y 2:</strong> Describen de forma natural los dos estados del espín del electrón (espín "arriba" y espín "abajo"). Dirac derivó el espín, no lo introdujo a mano.</li>
+                        <li><strong>Componentes 3 y 4:</strong> Correspondían a partículas con masa, pero que parecían tener estados de <em>energía negativa</em>. Lejos de ser un error matemático, Dirac interpretó esto (mediante el concepto del "Mar de Dirac") como la existencia de partículas idénticas al electrón pero con carga eléctrica opuesta.</li>
+                    </ul>
+                    <div class="bg-green-50 border-l-4 border-green-500 p-6 rounded-r-lg my-8 text-center">
+                        <p class="text-green-900 font-medium text-lg italic">
+                            "A través de una simple factorización de polinomios en matrices, Paul Dirac predijo teóricamente la existencia de la antimateria (el positrón) años antes de que fuera descubierta en un laboratorio."
+                        </p>
+                    </div>
+                </section>
+            </article>
+
+            <!-- Paginación entre páginas -->
+            <nav id="pager" class="mt-10 pt-6 border-t border-gray-100 flex items-center justify-between font-sans text-sm">
+                <a id="prev-link" href="#" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-brand-100 text-gray-700 hover:text-brand-700 transition-colors">&larr; <span id="prev-label"></span></a>
+                <span id="page-indicator" class="text-gray-400 text-xs uppercase tracking-widest"></span>
+                <a id="next-link" href="#" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-brand-100 text-gray-700 hover:text-brand-700 transition-colors"><span id="next-label"></span> &rarr;</a>
+            </nav>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-8 text-center text-sm font-sans mt-12">
+        <p>Documento interactivo sobre las Matrices de Dirac.</p>
+        <p class="mt-2 text-gray-500">Renderizado de matemáticas impulsado por MathJax &bull; Estilos por Tailwind CSS</p>
+    </footer>
+
+    <!-- Page Router Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const pages = Array.from(document.querySelectorAll('section.page'));
+            const navLinks = Array.from(document.querySelectorAll('#toc a'));
+
+            const labels = {};
+            navLinks.forEach(link => {
+                labels[link.getAttribute('href').slice(1)] = link.textContent.trim();
+            });
+
+            function setLabel(id, text) {
+                const el = document.getElementById(id);
+                el.textContent = text;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    MathJax.typesetPromise([el]).catch(() => {});
+                }
+            }
+
+            function showPage(id) {
+                const target = pages.find(p => p.id === id) || pages[0];
+                const index = pages.indexOf(target);
+
+                pages.forEach(p => p.classList.toggle('active', p === target));
+
+                navLinks.forEach(link => {
+                    const isActive = link.getAttribute('href') === '#' + target.id;
+                    link.classList.toggle('toc-active', isActive);
+                });
+
+                const prev = pages[index - 1];
+                const next = pages[index + 1];
+                const prevLink = document.getElementById('prev-link');
+                const nextLink = document.getElementById('next-link');
+                prevLink.style.visibility = prev ? 'visible' : 'hidden';
+                nextLink.style.visibility = next ? 'visible' : 'hidden';
+                if (prev) {
+                    prevLink.href = '#' + prev.id;
+                    setLabel('prev-label', labels[prev.id].replace(/^\d+\.\s*/, ''));
+                }
+                if (next) {
+                    nextLink.href = '#' + next.id;
+                    setLabel('next-label', labels[next.id].replace(/^\d+\.\s*/, ''));
+                }
+                document.getElementById('page-indicator').textContent =
+                    (index + 1) + ' / ' + pages.length;
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            function route() {
+                showPage(location.hash.slice(1));
+            }
+
+            window.addEventListener('hashchange', route);
+            route();
+        });
+    </script>
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js', { scope: './' }).catch(console.error);
+            });
+        }
+    </script>
+</body>
+</html>

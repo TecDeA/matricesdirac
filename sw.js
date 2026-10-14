@@ -12,7 +12,7 @@
 
 // Versión de la app: única fuente de verdad para el chip de la interfaz.
 // Súbelas en cada despliegue (v6, v7, ...) para que los clientes se actualicen.
-const VERSION = 'v1.5';
+const VERSION = 'v1.6';
 const CACHE_NAME = 'matrices-dirac-' + VERSION;
 
 // Ámbito propio, resuelto a partir del registro de este Service Worker.
